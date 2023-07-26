@@ -1,10 +1,19 @@
-//const { response } = require("express");
-
 const btn = document.getElementById('submitTodo');
 const userInputNode = document.getElementById('userInput');
 const prioritySelctorNode = document.getElementById('prioritySelector');
 const todoItemNode = document.getElementById('todo-item');
-let count = 0;
+//let count = 0;
+fetch('/todo-data').then(function(res){
+    res.json().then(function(todos){
+        todos=JSON.parse(todos);
+        //console.log(Array.isArray(todos))
+        todos.forEach((todo) => {
+            showTodoInUI(todo);
+            
+        });
+    });
+});
+
 
 btn.addEventListener("click" ,function(){
     const todoContent = userInputNode.value;
@@ -71,11 +80,11 @@ function showTodoInUI(todo){
             })
         });
     })
-    todotextNode2.style.textAlign = "center";
-    if(count%2==0){
-        todoTextNode.style.backgroundColor='rgb(100,100,100)'
+    //todotextNode2.style.textAlign = "center";
+    // if(count%2==0){
+    //     todoTextNode.style.backgroundColor='rgb(100,100,100)'
         
-    }
+    // }
     const checkbox = document.createElement('input');
     checkbox.type = 'checkbox';
     checkbox.addEventListener('click',function(){
@@ -97,7 +106,7 @@ function showTodoInUI(todo){
         });
     })
 
-    count++;
+    //count++;
     todotextNode2.appendChild(checkbox)
     todotextNode2.appendChild(anchor);
     todoTextNode.appendChild(todotextNode1);
@@ -106,13 +115,3 @@ function showTodoInUI(todo){
 
 }
 
-fetch('/todo-data').then(function(res){
-    res.json().then(function(todos){
-        todos=JSON.parse(todos);
-        //console.log(Array.isArray(todos))
-        todos.forEach((todo) => {
-            showTodoInUI(todo);
-            
-        });
-    });
-});

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        nav{
+            background-color: #333; overflow: hidden;
+            padding-top: 18px;
+            height: 50px;
+         }
+        
+        a{
+            color: white;
+            text-decoration: none;
+            margin-right: 24px;
+            margin-left: 18px;
+            margin-top: 40px;
+            font-size: medium;
+        }
+        .container {
+  background-color: #ffffff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  border-radius: 8px;
+}
+.login-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+}
+h1 {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+label {
+  font-size: 16px;
+}
+input[type="submit"] {
+      background-color: #4CAF50;
+      color: #fff;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+
+
+    </style>
+</head>
+<body>
+    <nav>
+
+        <a href="/">Home</a>
+        
+        <a href="/about">About</a>
+        
+        <a href="/contact">Contact</a>
+        
+        <a href="/todo">Todo</a>
+        <a href="/login">login</a>
+        <a href="/signup">Signup</a>
+        
+        </nav>
+        
+        <!-- Page content -->
+        <div class="content">
+        <div class="container">
+            <form class="login-form" action="/login" method="post">
+              <h1>Login</h1>
+              <label for="email">Email:</label>
+              <input  id="email" name="email" placeholder="Enter your email" required>
+              
+              <label for="password">Password:</label>
+              <input id="password" name="password" placeholder="Enter your password" required>
+              
+              <input type="submit" value="Login">
+            </form>
+          </div>
+        </div>
+        
+</body>
+</html>

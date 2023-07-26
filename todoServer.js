@@ -1,58 +1,131 @@
 const express = require('express');
 const fs = require('fs');
-
 const app = express();
-
+var session = require('express-session')
+app.use(express.json());
+app.use(express.urlencoded({extended:true}));
+//session
+app.set('trust proxy', 1) // trust first proxy
+app.use(session({
+  secret: 'anuj',
+  resave: false,
+  saveUninitialized: true,
+}))
+//connect all pages throw server
 app.get('/',function(req,res){
+    if(!req.session.isloggedin){
+        res.redirect("/login");
+        return;
+    }
     res.sendFile(__dirname+"/index.html");
 });
+app.get('/about',function(req,res){
+    if(!req.session.isloggedin){
+        res.redirect("/login");
+        return;
+    }
+    res.sendFile(__dirname+"/about.html");
+})
+app.get('/contact',function(req,res){
+    if(!req.session.isloggedin){
+        res.redirect("/login");
+        return;
+    }
+    res.sendFile(__dirname+"/contact.html");
+})
 
-//app.use(express.static('public'));
+app.get('/todo',function(req,res){
+    if(!req.session.isloggedin){
+        res.redirect("/login");
+        return;
+    }
+    res.sendFile(__dirname+"/todo.html");
+})
 
-app.use(express.json());
+
+app.get('/login',function(req,res){
+    res.sendFile(__dirname+"/login.html");
+    
+})
+app.post("/login",function(req,res){
+    const bufferData = fs.readFileSync('form.txt');
+     const email = req.body.email;
+     const password=req.body.password;
+     // Convert the Buffer to a string
+     const dataAsString = bufferData.toString();
+     if (dataAsString.includes(email,password)) {
+        console.log("succes");
+        req.session.isloggedin=true;
+       res.redirect('/');
+    
+     }
+     else{
+        console.log("not data fournd")
+        res.redirect('/signup')
+     }
+     //res.status(401).send("error")
+    // const eamil=req.body.email;
+    // const password=req.body.password;
+    // if(eamil==="a" && password==="a"){
+    //     req.session.isloggedin=true;
+    //     res.redirect("/");   //stautus code 301     
+    //     return;
+    // }
+    // res.status(401).send("error")
+});
+
+
+// app.post('/login',function(req,res){
+//     fs.readFile('./form.txt',"utf-8",function(err,data){
+//         if(err){
+//             res.status(500).json("internal error");
+//             return;
+//         }
+//         if(data.length===0)
+//         {
+//             res.status(500).json("the file is empty");
+//             return;
+//         }
+//         const todo = req.body;
+//         //console.log(todo)
+//         data = JSON.parse(data);
+//         let updated_data = [];
+//         //let removedTodo ;
+//         for(let i =0;i<data.length;i++){
+//             if(data[i].todoContent!=todo.todoContent)
+//                 updated_data.push(data[i]);
+//         }
+//         //console.log(todo.a)
+//         fs.writeFile("./treasure.txt",JSON.stringify(updated_data),(err)=>{
+//             if(err){
+//                 res.status(500).json("Internal error");
+//                 return;
+//             }
+//             res.status(200).json(JSON.stringify(updated_data));
+//         })
+//     })
+// })
+app.get('/signup',function(req,res){
+    res.sendFile(__dirname+"/signup.html");
+    
+});
+
+// app.post("/signup",function(req,res){
+//     const signupData=req.body;
+//     readALLsignupdata(signupData,writesignupdata,res);
+// });
+
+app.get('/script.js',function(req,res){
+   //res.writeHead({'content-Type': 'application/javascript'})
+   res.sendFile(__dirname+'/script.js')
+    
+}) 
 
 app.post('/todo',function(req,res){
     const todoContent = req.body;
     readALLTodos(todoContent,writeTodo,res);
-    
-//     fs.readFile('./treasure.txt',"utf-8",(err,data)=>{
-//         if(err){
-//             console.log(err);
-//             return ;
-//         }
-//         if(data.length==0){
-//             data = "[]";
-//         }
-//         try{
-//             data = JSON.parse(data);
-//             data.push(req.body);
-
-//             fs.writeFile("./treasure.txt",JSON.stringify(data),(err)=>{
-//                 if(err){
-//                     console.log(err);
-//                     return;
-//                 }
-//                 else{
-//                     res.status(200).json("todo saved successfully");
-//                 }
-//             })
-//         }
-//         catch{
-//             res.status(500).json({message:'Internal sever erro'});
-//             return;
-//         }
-        
-        
-//     })
 })
 
-app.get('./about',function(req,res){
-    res.sendFile(__dirname+"/about.html");
-})
-
-app.get('/contact',function(req,res){
-    res.sendFile(__dirname+"/contact.html");
-})
 app.get('/todo-data',function(req,res){
     //res.sendFile(__dirname+"/todoViews/todo.html");
     fs.readFile('./treasure.txt',"utf-8",(err,data)=>{
@@ -66,14 +139,6 @@ app.get('/todo-data',function(req,res){
 })
 
 
-app.get('/todo',function(req,res){
-    res.sendFile(__dirname+"/todo.html");
-})
-app.get('/script.js',function(req,res){
-   //res.writeHead({'content-Type': 'application/javascript'})
-   res.sendFile(__dirname+'/script.js')
-    
-}) 
 
 app.post('/remove-data',function(req,res){
     fs.readFile('./treasure.txt',"utf-8",function(err,data){
@@ -142,34 +207,83 @@ app.post('/update-status',function(req,res){
 
 })
 
+
+
+
+// app.post("/signup", function (req, res) {
+//     const signupData = req.body;
+//     const email = req.body.email;
+//     readALLTodos(signupData, function (signupDatas) {
+//         if (signupDatas.some((signupData) => signupData.email === email)) {
+//             // Assuming `res.redirect` is valid and works as expected.
+//             res.redirect("/login");
+//         } else {
+            
+//             res.redirect("/signup");
+//         }
+//     }, res);
+// });
+
+ app.post("/signup",function(req,res){
+     const bufferData = fs.readFileSync('form.txt');
+     const email = req.body.email;
+     // Convert the Buffer to a string
+     const dataAsString = bufferData.toString();
+     if (dataAsString.includes(email)) {
+       res.redirect('/login');
+     }
+     else{
+        const signupData=req.body;
+        readALLsignupdata(signupData,writesignupdata,res);
+        res.redirect("/");
+    
+     }
+
+   
+});
+
+
+ // const email=req.body.eamil;
+    // fs.readFile("treasure.txt",function(err,data){
+    //     if(err){
+    //         throw err;
+    //     }
+    //     if(data.includes(email)){
+    //         res.redirect("/login");
+    //     }
+    // });
+
+
+
+
+
+
+
+
+
+
 app.listen(3000,()=>{
     console.log('listening at the port 3000');
 })
 
-function readALLTodos (todo,callback,res) {
 
+
+
+
+//function for code abstuction (read data and write data)
+function readALLTodos (todo,callback,res) {
     fs.readFile("./treasure.txt", "utf-8", function (err, data) {
-    
-    
     if (err) {
-    
     callback(err,data,res);
-    
     return;
-    
     }
     if(!todo){
         res.status(200).json(JSON.stringify(data));
         return ;
     }
-
-    
     if (data.length==0) {data = "[]"; 
-    
     }
-    
     try {
-    
     data = JSON.parse(data); 
     data.push(todo);
     callback(null, data,res); } catch (err) { callback(err,data,res);
@@ -192,3 +306,38 @@ function writeTodo(err,data,res){
 
 }
 
+
+function readALLsignupdata (signupData,callback,res) {
+    fs.readFile("./form.txt", "utf-8", function (err, data) {
+    if (err) {
+    callback(err,data,res);
+    return;
+    }
+    if(!signupData){
+        res.status(200).json(JSON.stringify(data));
+        return ;
+    }
+    if (data.length==0) {data = "[]"; 
+    }
+    try {
+    data = JSON.parse(data); 
+    data.push(signupData);
+    callback(null, data,res); } catch (err) { callback(err,data,res);
+    }
+    })
+}
+
+function writesignupdata(err,data,res){
+    if(err){
+        res.status(500).json({message:"Internal server error"});
+        return ;
+    }
+    fs.writeFile('./form.txt',JSON.stringify(data),(err)=>{
+        if(err){
+            res.status(500).json({message:"Internal server error"});
+            return;
+        }
+        //res.status(200).json("success");
+    })
+
+}
