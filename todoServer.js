@@ -1,9 +1,14 @@
 const express = require('express');
 const fs = require('fs');
+const path = require('path');
 const app = express();
-var session = require('express-session')
+var session = require('express-session');
+const { error } = require('console');
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
+
+app.set('view engine' ,"ejs");
+
 //session
 app.set('trust proxy', 1) // trust first proxy
 app.use(session({
@@ -17,7 +22,7 @@ app.get('/',function(req,res){
         res.redirect("/login");
         return;
     }
-    res.sendFile(__dirname+"/index.html");
+    res.render("index",{username:req.body.email});
 });
 app.get('/about',function(req,res){
     if(!req.session.isloggedin){
@@ -44,76 +49,76 @@ app.get('/todo',function(req,res){
 
 
 app.get('/login',function(req,res){
-    res.sendFile(__dirname+"/login.html");
+    res.render("login",{error:null});
     
 })
-app.post("/login",function(req,res){
-    const bufferData = fs.readFileSync('form.txt');
-     const email = req.body.email;
-     const password=req.body.password;
-     // Convert the Buffer to a string
-     const dataAsString = bufferData.toString();
-     if (dataAsString.includes(email,password)) {
-        console.log("succes");
-        req.session.isloggedin=true;
-       res.redirect('/');
-    
-     }
-     else{
-        console.log("not data fournd")
-        res.redirect('/signup')
-     }
-     //res.status(401).send("error")
-    // const eamil=req.body.email;
-    // const password=req.body.password;
-    // if(eamil==="a" && password==="a"){
-    //     req.session.isloggedin=true;
-    //     res.redirect("/");   //stautus code 301     
-    //     return;
-    // }
-    // res.status(401).send("error")
+
+
+
+//login page not found
+const filePath = path.join(__dirname, 'form.txt');
+const fileData = fs.readFileSync(filePath, 'utf8');
+const dataEntries = fileData.split();
+console.log(dataEntries)
+app.post("/login", function(req, res) {
+    const email = req.body.email;
+    const password = req.body.password;
+
+    const dataArray = JSON.parse(dataEntries);
+
+
+
+//Function to check if email and password match
+function checkEmailAndPassword(email1, password1) {
+  return email1 === email && password1 === password;
+}
+//terate through each object in the array and check the email and password
+dataArray.forEach((entry) => {
+  const { email, password } = entry;
+  //console.log({ email, password } );
+  if (checkEmailAndPassword(email, password)) {
+    console.log("Login successful!");
+    req.session.isloggedin = true;
+    return  res.redirect('/');
+    } 
+//else {
+//     console.log("Invalid login credentials");
+     //return res.redirect('/signup');
+//     // Handle invalid credentials, redirect, or show an error message.
+//     return;
+res.render("login",{error:"invalid username or password"})
+//   }
+});
+//res.render("login",{error:"invalid username or password"})
 });
 
 
-// app.post('/login',function(req,res){
-//     fs.readFile('./form.txt',"utf-8",function(err,data){
-//         if(err){
-//             res.status(500).json("internal error");
-//             return;
-//         }
-//         if(data.length===0)
-//         {
-//             res.status(500).json("the file is empty");
-//             return;
-//         }
-//         const todo = req.body;
-//         //console.log(todo)
-//         data = JSON.parse(data);
-//         let updated_data = [];
-//         //let removedTodo ;
-//         for(let i =0;i<data.length;i++){
-//             if(data[i].todoContent!=todo.todoContent)
-//                 updated_data.push(data[i]);
-//         }
-//         //console.log(todo.a)
-//         fs.writeFile("./treasure.txt",JSON.stringify(updated_data),(err)=>{
-//             if(err){
-//                 res.status(500).json("Internal error");
-//                 return;
-//             }
-//             res.status(200).json(JSON.stringify(updated_data));
-//         })
-//     })
-// })
+
+//signup
 app.get('/signup',function(req,res){
     res.sendFile(__dirname+"/signup.html");
     
 });
 
-// app.post("/signup",function(req,res){
-//     const signupData=req.body;
-//     readALLsignupdata(signupData,writesignupdata,res);
-// });
+app.post("/signup",function(req,res){
+    const bufferData = fs.readFileSync('form.txt');
+    const email = req.body.email;
+    // Convert the Buffer to a string
+    const dataAsString = bufferData.toString();
+    if (dataAsString.includes(email)) {
+      res.redirect('/login');
+    }
+    else{
+       const signupData=req.body;
+       readALLsignupdata(signupData,writesignupdata,res);
+       res.redirect("/");
+   
+    }
+
+  
+});
+
+
 
 app.get('/script.js',function(req,res){
    //res.writeHead({'content-Type': 'application/javascript'})
@@ -139,7 +144,7 @@ app.get('/todo-data',function(req,res){
 })
 
 
-
+//remove data from todolist
 app.post('/remove-data',function(req,res){
     fs.readFile('./treasure.txt',"utf-8",function(err,data){
         if(err){
@@ -172,6 +177,10 @@ app.post('/remove-data',function(req,res){
         })
     })
 })
+
+
+
+//update todo list
 app.post('/update-status',function(req,res){
     
     fs.readFile('./treasure.txt','utf-8',(err,data)=>{
@@ -209,59 +218,6 @@ app.post('/update-status',function(req,res){
 
 
 
-
-// app.post("/signup", function (req, res) {
-//     const signupData = req.body;
-//     const email = req.body.email;
-//     readALLTodos(signupData, function (signupDatas) {
-//         if (signupDatas.some((signupData) => signupData.email === email)) {
-//             // Assuming `res.redirect` is valid and works as expected.
-//             res.redirect("/login");
-//         } else {
-            
-//             res.redirect("/signup");
-//         }
-//     }, res);
-// });
-
- app.post("/signup",function(req,res){
-     const bufferData = fs.readFileSync('form.txt');
-     const email = req.body.email;
-     // Convert the Buffer to a string
-     const dataAsString = bufferData.toString();
-     if (dataAsString.includes(email)) {
-       res.redirect('/login');
-     }
-     else{
-        const signupData=req.body;
-        readALLsignupdata(signupData,writesignupdata,res);
-        res.redirect("/");
-    
-     }
-
-   
-});
-
-
- // const email=req.body.eamil;
-    // fs.readFile("treasure.txt",function(err,data){
-    //     if(err){
-    //         throw err;
-    //     }
-    //     if(data.includes(email)){
-    //         res.redirect("/login");
-    //     }
-    // });
-
-
-
-
-
-
-
-
-
-
 app.listen(3000,()=>{
     console.log('listening at the port 3000');
 })
@@ -270,7 +226,7 @@ app.listen(3000,()=>{
 
 
 
-//function for code abstuction (read data and write data)
+//function for code abstuction (read data and write data  for todolist)
 function readALLTodos (todo,callback,res) {
     fs.readFile("./treasure.txt", "utf-8", function (err, data) {
     if (err) {
@@ -307,6 +263,8 @@ function writeTodo(err,data,res){
 }
 
 
+
+//function for code abstuction (read data and write data  for authentication and autreization)
 function readALLsignupdata (signupData,callback,res) {
     fs.readFile("./form.txt", "utf-8", function (err, data) {
     if (err) {
@@ -337,7 +295,7 @@ function writesignupdata(err,data,res){
             res.status(500).json({message:"Internal server error"});
             return;
         }
-        //res.status(200).json("success");
+        
     })
 
 }
