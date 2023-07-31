@@ -22,7 +22,7 @@ app.get('/',function(req,res){
         res.redirect("/login");
         return;
     }
-    res.render("index",{username:req.body.email});
+     res.render("index",{email:req.body.email});
 });
 app.get('/about',function(req,res){
     if(!req.session.isloggedin){
@@ -47,14 +47,23 @@ app.get('/todo',function(req,res){
     res.sendFile(__dirname+"/todo.html");
 })
 
-
+//logut 
 app.get('/login',function(req,res){
     res.render("login",{error:null});
     
 })
-
-
-
+// app.get('/logout',function(req,res){
+//     res.sendFile(__dirname+"/logout.html");
+    
+// })
+app.get('/logout', (req, res) => {
+    res.isLoggedIn = false;
+    res.clearCookie('username');
+    return res.redirect('/login');
+  });
+// app.post('/logout', function(req, res) {
+//     res.redirect('/login');
+// });
 //login page not found
 const filePath = path.join(__dirname, 'form.txt');
 const fileData = fs.readFileSync(filePath, 'utf8');
@@ -63,7 +72,6 @@ console.log(dataEntries)
 app.post("/login", function(req, res) {
     const email = req.body.email;
     const password = req.body.password;
-
     const dataArray = JSON.parse(dataEntries);
 
 
@@ -210,11 +218,11 @@ app.post('/update-status',function(req,res){
                 return ;
             }
             res.status(200).send(JSON.stringify(updated_data));
-        })
+        });
 
-    })
+    });
 
-})
+});
 
 
 

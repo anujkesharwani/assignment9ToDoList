@@ -52,7 +52,7 @@ input[type="submit"] {
 
     </style>
 </head>
-<body>
+<>
     <nav>
 
         <a href="/">Home</a>
@@ -66,27 +66,13 @@ input[type="submit"] {
         <a href="/signup">Signup</a>
         <a href="/logout">Logout</a>
         
-        </nav>
+    </nav>
         
-        <!-- Page content -->
-        <div class="content">
-        <div class="container">
-            <form class="login-form" action="/login" method="post">
-              <h1>Login</h1>
-              <label for="email">Email:</label>
-              <input  id="email" name="email" placeholder="Enter your email" required>
-              
-              <label for="password">Password:</label>
-              <input id="password" name="password" placeholder="Enter your password" required>
-              <% if(error){ %> 
-                <p style="color: red;"><%= error %></p>
-                <% } %>
-              
-              
-              <input type="submit" value="Login">
-            </form>
-          </div>
-        </div>
-        
+
+    
+    <!-- <center><h1>please logout </h1></center>
+    <form action="/logout" method="post"></form>
+    <center><input type="submit" value="Logout" id="logoutBtn" style="background-color: red; padding: 14px 40px;"></center> 
+  </form>     -->
 </body>
 </html>
